@@ -1,0 +1,60 @@
+#!/bin/bash
+
+set -e
+
+CONFIG_FILE="$HOME/.kona_config"
+PASSWORD='3055DeerLoonPanda'
+
+get_target_ip() {
+    if [ -f "$CONFIG_FILE" ]; then
+        grep "^ip=" "$CONFIG_FILE" | cut -d'=' -f2
+    else
+        echo "Config file not found." >&2
+        exit 1
+    fi
+}
+
+run_target() {
+    TARGET_IP=$(get_target_ip)
+    sshpass -p "$PASSWORD" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@$TARGET_IP \
+        "systemctl start kona-mux"
+    sleep 2
+    sshpass -p "$PASSWORD" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@$TARGET_IP \
+        "/usr/bin/kona/stasis"
+}
+
+run_native() {
+    MUX_DIR="/home/hpham/MVE/repos/kona-qt/kona_mux"
+    GUI_DIR="/home/hpham/MVE/builds/kona-gui-build-native"
+
+    SESSION="kona-dev"
+    WINDOW_EXISTS=$(tmux list-windows -t "$SESSION" 2>/dev/null | grep -c "$SESSION")
+
+    if [ -n "$TMUX" ]; then
+        if tmux has-session -t "$SESSION" 2>/dev/null; then
+            tmux select-window -t "$SESSION"
+        else
+            tmux new-window -n "$SESSION" -c "$MUX_DIR"
+        fi
+        tmux send-keys -t "$(tmux display-message -p '#{session_name}:#{window_index}.0')" 'cargo run' C-m
+        tmux split-window -v -c "$GUI_DIR"
+        tmux send-keys -t "$(tmux display-message -p '#{session_name}:#{window_index}.1')" './stasis' C-m
+    else
+        if tmux has-session -t "$SESSION" 2>/dev/null; then
+            tmux new-window -t "$SESSION" -n reuse -c "$MUX_DIR"
+        else
+            tmux new-session -d -s "$SESSION" -n mux -c "$MUX_DIR"
+        fi
+        tmux send-keys -t "$SESSION":0.0 'cargo run' C-m
+        tmux split-window -v -t "$SESSION":0 -c "$GUI_DIR"
+        tmux send-keys -t "$SESSION":0.1 './stasis' C-m
+        tmux attach -t "$SESSION"
+    fi
+}
+
+case "$1" in
+    native) run_native ;;
+    target) run_target ;;
+    *) echo "Usage: $0 [native|target]" && exit 1 ;;
+esac
+
