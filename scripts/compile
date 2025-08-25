@@ -1,0 +1,28 @@
+#!/bin/bash
+
+set -e
+
+compile_native() {
+    cd /home/hpham/MVE/builds/kona-gui-build-native || exit
+    ~/Qt/6.7.0/gcc_64/bin/qmake DEFINES+=RESET_KEY=\\\\\\\"MVESecurityThroughSystems\\\\\\\" DEFINES+=DEBUG_KEY=1 ../../repos/kona-qt/kona_gui_app
+    make -j12
+
+    cd /home/hpham/MVE/repos/kona-qt/kona_mux || exit
+    cargo build
+}
+
+compile_target() {
+    cd /home/hpham/MVE/builds/kona-gui-build-target || exit
+    /opt/verdin6.7-all/4.0.16/sysroots/x86_64-pokysdk-linux/usr/bin/qmake DEFINES+=DEVELOPER_MODE_BUILD=1 ../../repos/kona-qt/kona_gui_app
+    make -j12
+    cd /home/hpham/MVE/repos/kona-qt/kona_mux || exit
+    cargo build --target=aarch64-unknown-linux-gnu --release
+
+}
+
+case "$1" in
+    native) compile_native ;;
+    target) compile_target ;;
+    *) echo "Usage: $0 [native|target]" && exit 1 ;;
+esac
+

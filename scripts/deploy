@@ -1,0 +1,43 @@
+#!/bin/bash
+
+set -e
+
+CONFIG_FILE="$HOME/.kona_config"
+PASSWORD='3055DeerLoonPanda'
+
+get_target_ip() {
+    if [ -f "$CONFIG_FILE" ]; then
+        grep "^ip=" "$CONFIG_FILE" | cut -d'=' -f2
+    else
+        echo "Config file not found." >&2
+        exit 1
+    fi
+}
+
+deploy_mux() {
+    TARGET_IP=$(get_target_ip)
+    sshpass -p "$PASSWORD" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@$TARGET_IP \
+        "rm /usr/bin/kona/kona.db"
+    sshpass -p "$PASSWORD" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@$TARGET_IP \
+        "systemctl stop kona-mux && killall stasis_mux"
+    sshpass -p "$PASSWORD" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+        /home/hpham/MVE/repos/kona-qt/kona_mux/target/aarch64-unknown-linux-gnu/release/stasis_mux \
+        root@$TARGET_IP:/usr/bin/kona/stasis_mux
+}
+
+deploy_gui() {
+    TARGET_IP=$(get_target_ip)
+    cd /home/hpham/MVE/builds/kona-gui-build-target || exit
+    sshpass -p "$PASSWORD" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@$TARGET_IP \
+        "systemctl stop kona-gui && killall stasis"
+    sshpass -p "$PASSWORD" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null stasis \
+        root@$TARGET_IP:/usr/bin/kona
+}
+
+case "$1" in
+    mux) deploy_mux ;;
+    gui) deploy_gui ;;
+    both) deploy_mux && deploy_gui ;;
+    *) echo "Usage: $0 [mux|gui|both]" && exit 1 ;;
+esac
+

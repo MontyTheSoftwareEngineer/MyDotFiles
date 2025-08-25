@@ -60,7 +60,7 @@ return {
       }
 
       -- Diagnostics configuration (optional, disable virtual text)
-      vim.diagnostic.config({ virtual_text = false })
+      vim.diagnostic.config({ virtual_text = true })
     end,
   }
 }

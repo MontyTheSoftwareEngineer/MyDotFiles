@@ -1,0 +1,12 @@
+#!/bin/bash
+
+CONFIG_FILE="$HOME/.kona_config"
+
+if [ -z "$1" ]; then
+    echo "Usage: set-ip <ip-address>"
+    exit 1
+fi
+
+echo "ip=$1" > "$CONFIG_FILE"
+echo "IP set to $1"
+

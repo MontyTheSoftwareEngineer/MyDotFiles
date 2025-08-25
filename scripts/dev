@@ -1,0 +1,30 @@
+#!/bin/bash
+
+if [ -n "$TMUX" ]; then
+  # Already inside tmux: switch if session exists, or create
+  if tmux has-session -t dev 2>/dev/null; then
+    tmux switch-client -t dev
+  else
+    tmux new-session -s dev -d
+    tmux send-keys -t dev:0 'cd /home/hpham/MVE/repos/kona-qt/kona_gui_app' C-m
+    tmux new-window -t dev
+    tmux send-keys -t dev:1 'cd /home/hpham/MVE && ./runner.sh' C-m
+    tmux split-window -h -t dev:1
+    tmux send-keys -t dev:1.1 'cd /home/hpham/MVE/repos/kona-qt/kona_mux' C-m
+    tmux switch-client -t dev
+  fi
+else
+  # Not in tmux: attach if exists, or create + attach
+  if tmux has-session -t dev 2>/dev/null; then
+    tmux attach -t dev
+  else
+    tmux new-session -s dev -d
+    tmux send-keys -t dev:0 'cd /home/hpham/MVE/repos/kona-qt/kona_gui_app' C-m
+    tmux new-window -t dev
+    tmux send-keys -t dev:1 'cd /home/hpham/MVE && ./runner.sh' C-m
+    tmux split-window -h -t dev:1
+    tmux send-keys -t dev:1.1 'cd /home/hpham/MVE/repos/kona-qt/kona_mux' C-m
+    tmux attach -t dev
+  fi
+fi
+

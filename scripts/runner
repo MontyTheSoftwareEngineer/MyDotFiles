@@ -1,0 +1,160 @@
+#!/bin/bash
+
+CONFIG_FILE="$HOME/.kona_config"
+TARGET_IP=""
+
+load_ip() {
+    if [ -f "$CONFIG_FILE" ]; then
+        TARGET_IP=$(cat "$CONFIG_FILE")
+    fi
+}
+
+save_ip() {
+    echo "$1" > "$CONFIG_FILE"
+}
+
+pause() {
+    read -p "Press enter to continue..."
+}
+
+compile_native() {
+    cd /home/hpham/MVE/builds/kona-gui-build-native || exit
+    ~/Qt/6.7.0/gcc_64/bin/qmake DEFINES+=RESET_KEY=\\\\\\\"\"MVESecurityThroughSystems\\\\\\\"\" DEFINES+=DEBUG_KEY=1 ../../repos/kona-qt/kona_gui_app
+    make -j12
+    pause
+}
+
+compile_target() {
+    cd /home/hpham/MVE/builds/kona-gui-build-target || exit
+    /opt/verdin6.7-all/4.0.16/sysroots/x86_64-pokysdk-linux/usr/bin/qmake DEFINES+=DEVELOPER_MODE_BUILD=1 ../../repos/kona-qt/kona_gui_app
+    make -j12
+    pause
+}
+
+deploy_target() {
+    load_ip
+    if [ -z "$TARGET_IP" ]; then
+        echo "Target IP not set. Please set it first."
+        pause
+        return
+    fi
+    cd /home/hpham/MVE/builds/kona-gui-build-target || exit
+    sshpass -p '3055DeerLoonPanda' ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@$TARGET_IP "systemctl stop kona-gui"
+    sshpass -p '3055DeerLoonPanda' ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@$TARGET_IP "killall stasis"
+    sshpass -p '3055DeerLoonPanda' scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null stasis root@$TARGET_IP:/usr/bin/kona
+    pause
+}
+
+run_target() {
+    load_ip
+    if [ -z "$TARGET_IP" ]; then
+        echo "Target IP not set. Please set it first."
+        pause
+        return
+    fi
+    sshpass -p '3055DeerLoonPanda' ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@$TARGET_IP "/usr/bin/kona/stasis"
+    pause
+}
+
+run_native() {
+    /home/hpham/MVE/builds/kona-gui-build-native/stasis &
+    pause
+}
+
+set_target_ip() {
+    read -p "Enter new target IP: " new_ip
+    save_ip "$new_ip"
+    echo "Target IP set to $new_ip"
+    pause
+}
+
+ssh_to_target() {
+    load_ip
+    if [ -z "$TARGET_IP" ]; then
+        echo "Target IP not set. Please set it first."
+        pause
+        return
+    fi
+    sshpass -p '3055DeerLoonPanda' ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@$TARGET_IP
+}
+
+compile_mux_target() {
+    cd /home/hpham/MVE/repos/kona-qt/kona_mux || exit
+    cargo build --target=aarch64-unknown-linux-gnu --release
+    pause
+}
+
+deploy_mux() {
+    load_ip
+    if [ -z "$TARGET_IP" ]; then
+        echo "Target IP not set. Please set it first."
+        pause
+        return
+    fi
+    sshpass -p '3055DeerLoonPanda' ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@$TARGET_IP \
+        "systemctl stop kona-mux; killall stasis_mux"
+    sshpass -p '3055DeerLoonPanda' scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+        /home/hpham/MVE/repos/kona-qt/kona_mux/target/aarch64-unknown-linux-gnu/release/stasis_mux \
+        root@$TARGET_IP:/usr/bin/kona/stasis_mux
+    pause
+}
+
+kill_gui_and_mux() {
+    load_ip
+    if [ -z "$TARGET_IP" ]; then
+        echo "Target IP not set. Please set it first."
+        pause
+        return
+    fi
+    sshpass -p '3055DeerLoonPanda' ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@$TARGET_IP \
+        "systemctl stop kona-gui; systemctl stop kona-mux; killall stasis; killall stasis_mux"
+    pause
+}
+
+run_mux() {
+    load_ip
+    if [ -z "$TARGET_IP" ]; then
+        echo "Target IP not set. Please set it first."
+        pause
+        return
+    fi
+    sshpass -p '3055DeerLoonPanda' ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@$TARGET_IP \
+        "systemctl start kona-mux"
+    pause
+}
+
+while true; do
+    clear
+    echo "========== Kona GUI Menu =========="
+    echo "1. Compile Native"
+    echo "2. Compile Target"
+    echo "3. Deploy Target"
+    echo "4. Run Target"
+    echo "5. Set Target IP"
+    echo "6. SSH to Target"
+    echo "7. Run Native"
+    echo "8. Compile Mux Target"
+    echo "9. Deploy Mux"
+    echo "10. Kill GUI + Mux"
+    echo "11. Run Mux"
+    echo "0. Exit"
+    echo "==================================="
+    read -p "Choose an option: " choice
+
+    case $choice in
+        1) compile_native ;;
+        2) compile_target ;;
+        3) deploy_target ;;
+        4) run_target ;;
+        5) set_target_ip ;;
+        6) ssh_to_target ;;
+        7) run_native ;;
+        8) compile_mux_target ;;
+        9) deploy_mux ;;
+        10) kill_gui_and_mux ;;
+        11) run_mux ;;
+        0) exit 0 ;;
+        *) echo "Invalid option"; pause ;;
+    esac
+done
+
