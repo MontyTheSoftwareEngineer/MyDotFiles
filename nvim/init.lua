@@ -1,6 +1,6 @@
 vim.opt.nu = true
 vim.opt.number = true
-vim.opt.relativenumber = true
+--vim.opt.relativenumber = true
 vim.cmd("set expandtab")
 vim.cmd("set shiftwidth=2")
 vim.g.mapleader = " "
