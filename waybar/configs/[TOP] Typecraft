@@ -7,7 +7,7 @@
   "$HOME/.config/waybar/UserModules",
   ],
   "position": "top",
-  "modules-left": ["hyprland/workspaces"],
+  "modules-left": ["hyprland/workspaces#rw"],
   "modules-center": ["hyprland/window"],
   "modules-right": ["cpu","memory","disk","tray","network", "pulseaudio", "battery", "clock"],
   "clock": {
