@@ -9,7 +9,7 @@
   "position": "top",
   "modules-left": ["hyprland/workspaces#rw"],
   "modules-center": ["hyprland/window"],
-  "modules-right": ["cpu","memory","disk","tray","network", "pulseaudio", "battery", "clock"],
+  "modules-right": ["custom/powerprofile","cpu","memory","disk","tray","network","battery", "clock","pulseaudio"],
   "clock": {
     "format": "{:%a %d %I:%M %p}",
     "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>"
@@ -56,5 +56,10 @@
   "path": "/",
   "format": "<span foreground='#f9e2af'> </span>{free}",
   "tooltip": false
+},
+"custom/powerprofile": {
+  "exec": "~/.config/waybar/scripts/powerprofile.sh",
+  "interval": 2,
+  "return-type": "json",
 }
 }
