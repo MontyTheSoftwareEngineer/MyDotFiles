@@ -2,6 +2,7 @@
 # Power profile → wallpaper switcher for Waybar
 
 # --- config ---
+iDIR="$HOME/.config/swaync/images/ja.png"
 wallDIR="$HOME/Pictures/wallpapers"
 SCRIPTSDIR="$HOME/.config/hypr/scripts"
 FPS=30
@@ -37,16 +38,19 @@ case "$profile" in
     icon="🏎️"
     label="Sport"
     wallpaper="$wallDIR/tesla_sport.png"
+    notify-send -i $iDIR "SPORT MODE ACTIVATED"
     ;;
   balanced)
     icon="🚗"
     label="Normal"
     wallpaper="$wallDIR/tesla_normal.png"
+    notify-send -i $iDIR "NORMAL MODE ACTIVATED"
     ;;
   power-saver)
     icon="🌱"
     label="Eco"
     wallpaper="$wallDIR/tesla_eco.png"
+    notify-send -i $iDIR "ECO MODE ACTIVATED"
     ;;
 esac
 

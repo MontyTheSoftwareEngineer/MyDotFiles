@@ -19,6 +19,7 @@ pause() {
 
 compile_native() {
     cd /home/hpham/MVE/builds/kona-gui-build-native || exit
+    rm -rf *
     ~/Qt/6.7.0/gcc_64/bin/qmake DEFINES+=RESET_KEY=\\\\\\\"\"MVESecurityThroughSystems\\\\\\\"\" DEFINES+=DEBUG_KEY=1 ../../repos/kona-qt/kona_gui_app
     make -j12
     pause
@@ -26,6 +27,7 @@ compile_native() {
 
 compile_target() {
     cd /home/hpham/MVE/builds/kona-gui-build-target || exit
+    rm -rf *
     /opt/verdin6.7-all/4.0.16/sysroots/x86_64-pokysdk-linux/usr/bin/qmake DEFINES+=DEVELOPER_MODE_BUILD=1 ../../repos/kona-qt/kona_gui_app
     make -j12
     pause
@@ -57,7 +59,7 @@ run_target() {
 }
 
 run_native() {
-    /home/hpham/MVE/builds/kona-gui-build-native/stasis &
+    mangohud /home/hpham/MVE/builds/kona-gui-build-native/stasis &
     pause
 }
 
