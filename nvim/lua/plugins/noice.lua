@@ -16,6 +16,13 @@ return {
         inc_rename = false,
         lsp_doc_border = false,
       },
+      keys = { q = false },
+      routes = {
+      {
+        view = "notify",
+        filter = { event = "msg_showmode" },
+      },
+    },
     })
   end,
 }

@@ -27,8 +27,38 @@ vim.keymap.set("n", "<A-l>", "<cmd>vertical resize +2<CR>", { noremap = true, si
 vim.keymap.set("n", "<A-j>", "<cmd>resize +1<CR>", { noremap = true, silent = true })
 vim.keymap.set("n", "<A-k>", "<cmd>resize -1<CR>", { noremap = true, silent = true })
 
+vim.opt.timeoutlen = 300 -- 300ms to trigger 'jk' as escape
+vim.keymap.set({'i', 'v', 'n'}, 'jk', '<Esc>', { noremap = true, silent = true })
+
 
 vim.g.wiki_root = '~/Documents/HiFam/'
+
+
+-- Enhanced file watching and auto-reload settings
+     vim.opt.autoread = true          -- Auto read file when changed outside vim
+     vim.opt.updatetime = 300         -- Faster update time (default 4000ms)
+     vim.opt.swapfile = false         -- Disable swapfiles to avoid conflicts
+     vim.opt.backup = false           -- Don't create backup files
+     vim.opt.writebackup = false      -- Don't create backup while editing
+
+-- Auto-reload files when they change externally
+     vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold", "CursorHoldI" }, {
+       pattern = "*",
+       callback = function()
+         if vim.fn.mode() ~= 'c' then
+           vim.cmd('checktime')
+         end
+       end,
+     })
+
+
+ -- Notification when file is auto-reloaded
+     vim.api.nvim_create_autocmd("FileChangedShellPost", {
+       pattern = "*",
+       callback = function()
+         vim.notify("File reloaded: " .. vim.fn.expand("%:t"), vim.log.levels.INFO)
+       end,
+     })
 
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not (vim.uv or vim.loop).fs_stat(lazypath) then

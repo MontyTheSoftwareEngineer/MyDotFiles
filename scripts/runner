@@ -59,7 +59,7 @@ run_target() {
 }
 
 run_native() {
-    mangohud /home/hpham/MVE/builds/kona-gui-build-native/stasis &
+    /home/hpham/MVE/builds/kona-gui-build-native/stasis &
     pause
 }
 
