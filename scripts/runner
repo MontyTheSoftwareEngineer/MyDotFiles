@@ -20,7 +20,7 @@ pause() {
 compile_native() {
     cd /home/hpham/MVE/builds/kona-gui-build-native || exit
     rm -rf *
-    ~/Qt/6.7.0/gcc_64/bin/qmake DEFINES+=RESET_KEY=\\\\\\\"\"MVESecurityThroughSystems\\\\\\\"\" DEFINES+=DEBUG_KEY=1 ../../repos/kona-qt/kona_gui_app
+    ~/Qt/6.7.0/gcc_64/bin/qmake DEFINES+=RESET_KEY=\\\\\\\"\"MVESecurityThroughSystems\\\\\\\"\" DEFINES+=DEVELOPER_MODE_BUILD=1 DEFINES+=DEBUG_KEY=1 ../../repos/kona-qt/kona_gui_app
     make -j12
     pause
 }
