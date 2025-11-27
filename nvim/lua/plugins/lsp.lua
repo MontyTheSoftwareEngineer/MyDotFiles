@@ -59,6 +59,21 @@ return {
         end
       }
 
+      -- Setup lua_ls for Lua (fixes undefined 'vim' warnings)
+      require'lspconfig'.lua_ls.setup{
+        settings = {
+          Lua = {
+            diagnostics = {
+              globals = { 'vim' },
+            },
+            workspace = {
+              library = vim.api.nvim_get_runtime_file("", true),
+              checkThirdParty = false,
+            },
+          },
+        },
+      }
+
       -- Diagnostics configuration (optional, disable virtual text)
       vim.diagnostic.config({ virtual_text = true })
     end,

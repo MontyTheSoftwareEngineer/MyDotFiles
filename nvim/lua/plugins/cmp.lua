@@ -21,7 +21,7 @@ return {
           ['<C-b>'] = cmp.mapping.scroll_docs(-1),
           ['<C-f>'] = cmp.mapping.scroll_docs(1),
           ['<C-Space>'] = cmp.mapping.complete(),
-          ['<C-y>'] = cmp.mapping.confirm({ select = true }),
+          ['<CR>'] = cmp.mapping.confirm({ select = true }),
           ['<Tab>'] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Insert }),
           ['<S-Tab>'] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Insert }),
         }),

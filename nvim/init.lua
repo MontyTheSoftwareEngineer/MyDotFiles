@@ -84,5 +84,35 @@ vim.o.termguicolors = true
 --require ("black_green")
 require("lazy").setup("plugins")
 
--- Set colorscheme after lazy loading
-vim.cmd.colorscheme("gruvbox-material")
+-- Colorscheme is set by the mapledark plugin
+
+-- Active/inactive window highlighting
+vim.api.nvim_create_autocmd({"WinEnter", "BufWinEnter"}, {
+  callback = function()
+    vim.wo.winhl = "Normal:Normal,EndOfBuffer:Normal,SignColumn:Normal"
+  end,
+})
+
+vim.api.nvim_create_autocmd("WinLeave", {
+  callback = function()
+    vim.wo.winhl = "Normal:NormalNC,EndOfBuffer:NormalNC,SignColumn:NormalNC"
+  end,
+})
+
+-- Set up the inactive window highlight group
+vim.api.nvim_create_autocmd("ColorScheme", {
+  callback = function()
+    -- Set active pane to light grey background
+    vim.api.nvim_set_hl(0, "Normal", { bg = "#2a2a2a" })
+    vim.api.nvim_set_hl(0, "EndOfBuffer", { bg = "#2a2a2a" })
+    vim.api.nvim_set_hl(0, "SignColumn", { bg = "#2a2a2a" })
+    -- Set inactive panes to solid black background
+    vim.api.nvim_set_hl(0, "NormalNC", { bg = "#000000" })
+  end,
+})
+
+-- Apply the colors immediately
+vim.api.nvim_set_hl(0, "Normal", { bg = "#2a2a2a" })
+vim.api.nvim_set_hl(0, "NormalNC", { bg = "#000000" })
+vim.api.nvim_set_hl(0, "EndOfBuffer", { bg = "#2a2a2a" })
+vim.api.nvim_set_hl(0, "SignColumn", { bg = "#2a2a2a" })
