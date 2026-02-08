@@ -33,27 +33,107 @@ class Paths:
     QT_PATH = "/home/hpham/Qt/6.7.0/gcc_64/bin/qmake"
     SDK_QMAKE = "/opt/verdin6.7-all/4.0.16/sysroots/x86_64-pokysdk-linux/usr/bin/qmake"
 
+import base64
+import shutil
+
+def _script_dir() -> Path:
+    return Path(__file__).resolve().parent
+
+def _in_tty() -> bool:
+    return sys.stdout.isatty()
+
+def _is_kitty() -> bool:
+    return bool(os.environ.get("KITTY_WINDOW_ID") or os.environ.get("TERM", "").startswith("xterm-kitty"))
+
+def _is_iterm2() -> bool:
+    return os.environ.get("TERM_PROGRAM") == "iTerm.app"
+
+def get_terminal_width() -> int:
+    """Get terminal width, default to 80 if not available"""
+    try:
+        return os.get_terminal_size().columns
+    except:
+        return 80
+
+def center_print(text: str):
+    """Print text centered in terminal"""
+    term_width = get_terminal_width()
+    # The banner is 65 chars wide (including the border)
+    content_width = 65
+    if term_width > content_width:
+        padding = (term_width - content_width) // 2
+        print(' ' * padding + text)
+    else:
+        print(text)
+
+def center_input(prompt: str) -> str:
+    """Get centered input with prompt"""
+    term_width = get_terminal_width()
+    content_width = 65
+    if term_width > content_width:
+        padding = (term_width - content_width) // 2
+        # Print the prompt centered, then get input on same line
+        print(' ' * padding, end='')
+    return input(prompt)
+
+def show_splash_image():
+    """Best-effort splash image in terminals that support it."""
+    if not _in_tty():
+        return
+
+    img = _script_dir() / "shark.png"
+    if not img.exists():
+        return
+
+    # Clear a little space at top (optional)
+    print("\n", end="")
+
+    # Kitty (recommended on Linux)
+    if _is_kitty() and shutil.which("kitty"):
+        # Place it at the top, scaled to a reasonable size
+#        subprocess.call(["kitty", "+kitten", "icat", "--align", "center", "--scale-up", str(img)])
+        subprocess.call([
+            "kitty", "+kitten", "icat",
+            "--transfer-mode", "file",
+            str(img)
+        ])
+
+
+        return
+
+    # iTerm2 inline images (macOS iTerm2)
+    if _is_iterm2():
+        data = img.read_bytes()
+        b64 = base64.b64encode(data).decode("ascii")
+        # width can be "auto" or e.g. "50%"
+        sys.stdout.write(f"\033]1337;File=inline=1;width=50%;preserveAspectRatio=1:{b64}\a\n")
+        sys.stdout.flush()
+        return
+
+    # Fallback (no image protocol available)
+    # print("[splash: shark.png (terminal does not support inline images)]")
+
 def print_banner():
     """Print a cool ASCII art banner"""
     # Each line has exactly 63 chars between the borders
-    print(f"{Colors.BOLD}╔═══════════════════════════════════════════════════════════════╗{Colors.ENDC}")
-    print(f"{Colors.BOLD}║{Colors.ENDC}                                                               {Colors.BOLD}║{Colors.ENDC}")
-    print(f"{Colors.BOLD}║{Colors.ENDC}       {Colors.RED}██████╗██████╗ ██╗   ██╗ ██████╗{Colors.ENDC}                       {Colors.BOLD}║{Colors.ENDC}")
-    print(f"{Colors.BOLD}║{Colors.ENDC}       {Colors.RED}██╔════╝██╔══██╗╚██╗ ██╔╝██╔═══██╗{Colors.ENDC}                      {Colors.BOLD}║{Colors.ENDC}")
-    print(f"{Colors.BOLD}║{Colors.ENDC}       {Colors.WHITE}██║     ██████╔╝ ╚████╔╝ ██║   ██║{Colors.ENDC}                      {Colors.BOLD}║{Colors.ENDC}")
-    print(f"{Colors.BOLD}║{Colors.ENDC}       {Colors.WHITE}██║     ██╔══██╗  ╚██╔╝  ██║   ██║{Colors.ENDC}                      {Colors.BOLD}║{Colors.ENDC}")
-    print(f"{Colors.BOLD}║{Colors.ENDC}       {Colors.BLUE}╚██████╗██║  ██║   ██║   ╚██████╔╝{Colors.ENDC}                      {Colors.BOLD}║{Colors.ENDC}")
-    print(f"{Colors.BOLD}║{Colors.ENDC}       {Colors.BLUE} ╚═════╝╚═╝  ╚═╝   ╚═╝    ╚═════╝{Colors.ENDC}                       {Colors.BOLD}║{Colors.ENDC}")
-    print(f"{Colors.BOLD}║{Colors.ENDC}                                                               {Colors.BOLD}║{Colors.ENDC}")
-    print(f"{Colors.BOLD}║{Colors.ENDC}  {Colors.RED}██████╗ ██████╗ ███╗   ██╗███╗   ██╗███████╗ ██████╗████████╗{Colors.ENDC}  {Colors.BOLD}║{Colors.ENDC}")
-    print(f"{Colors.BOLD}║{Colors.ENDC}  {Colors.RED}██╔════╝██╔═══██╗████╗  ██║████╗  ██║██╔════╝██╔════╝╚══██╔══╝{Colors.ENDC}  {Colors.BOLD}║{Colors.ENDC}")
-    print(f"{Colors.BOLD}║{Colors.ENDC}  {Colors.WHITE}██║     ██║   ██║██╔██╗ ██║██╔██╗ ██║█████╗  ██║        ██║{Colors.ENDC}     {Colors.BOLD}║{Colors.ENDC}")
-    print(f"{Colors.BOLD}║{Colors.ENDC}  {Colors.WHITE}██║     ██║   ██║██║╚██╗██║██║╚██╗██║██╔══╝  ██║        ██║{Colors.ENDC}     {Colors.BOLD}║{Colors.ENDC}")
-    print(f"{Colors.BOLD}║{Colors.ENDC}  {Colors.BLUE}╚██████╗╚██████╔╝██║ ╚████║██║ ╚████║███████╗╚██████╗   ██║{Colors.ENDC}     {Colors.BOLD}║{Colors.ENDC}")
-    print(f"{Colors.BOLD}║{Colors.ENDC}  {Colors.BLUE} ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝  ╚═══╝╚══════╝ ╚═════╝   ╚═╝{Colors.ENDC}     {Colors.BOLD}║{Colors.ENDC}")
-    print(f"{Colors.BOLD}║{Colors.ENDC}                                                               {Colors.BOLD}║{Colors.ENDC}")
-    print(f"{Colors.BOLD}║{Colors.ENDC}                    Development Runner                         {Colors.BOLD}║{Colors.ENDC}")
-    print(f"{Colors.BOLD}╚═══════════════════════════════════════════════════════════════╝{Colors.ENDC}")
+    center_print(f"{Colors.BOLD}╔══════════════════════════════════════════════════════════════════╗{Colors.ENDC}")
+    center_print(f"{Colors.BOLD}║{Colors.ENDC}                                                                  {Colors.BOLD}║{Colors.ENDC}")
+    center_print(f"{Colors.BOLD}║{Colors.ENDC}        {Colors.RED}██████╗██████╗ ██╗   ██╗ ██████╗{Colors.ENDC}                          {Colors.BOLD}║{Colors.ENDC}")
+    center_print(f"{Colors.BOLD}║{Colors.ENDC}       {Colors.RED}██╔════╝██╔══██╗╚██╗ ██╔╝██╔═══██╗{Colors.ENDC}                         {Colors.BOLD}║{Colors.ENDC}")
+    center_print(f"{Colors.BOLD}║{Colors.ENDC}       {Colors.WHITE}██║     ██████╔╝ ╚████╔╝ ██║   ██║{Colors.ENDC}                         {Colors.BOLD}║{Colors.ENDC}")
+    center_print(f"{Colors.BOLD}║{Colors.ENDC}       {Colors.WHITE}██║     ██╔══██╗  ╚██╔╝  ██║   ██║{Colors.ENDC}                         {Colors.BOLD}║{Colors.ENDC}")
+    center_print(f"{Colors.BOLD}║{Colors.ENDC}       {Colors.BLUE}╚██████╗██║  ██║   ██║   ╚██████╔╝{Colors.ENDC}                         {Colors.BOLD}║{Colors.ENDC}")
+    center_print(f"{Colors.BOLD}║{Colors.ENDC}       {Colors.BLUE} ╚═════╝╚═╝  ╚═╝   ╚═╝    ╚═════╝{Colors.ENDC}                          {Colors.BOLD}║{Colors.ENDC}")
+    center_print(f"{Colors.BOLD}║{Colors.ENDC}                                                                  {Colors.BOLD}║{Colors.ENDC}")
+    center_print(f"{Colors.BOLD}║{Colors.ENDC}   {Colors.RED}██████╗ ██████╗ ███╗   ██╗███╗   ██╗███████╗ ██████╗████████╗{Colors.ENDC}  {Colors.BOLD}║{Colors.ENDC}")
+    center_print(f"{Colors.BOLD}║{Colors.ENDC}  {Colors.RED}██╔════╝██╔═══██╗████╗  ██║████╗  ██║██╔════╝██╔════╝╚══██╔══╝{Colors.ENDC}  {Colors.BOLD}║{Colors.ENDC}")
+    center_print(f"{Colors.BOLD}║{Colors.ENDC}  {Colors.WHITE}██║     ██║   ██║██╔██╗ ██║██╔██╗ ██║█████╗  ██║        ██║{Colors.ENDC}     {Colors.BOLD}║{Colors.ENDC}")
+    center_print(f"{Colors.BOLD}║{Colors.ENDC}  {Colors.WHITE}██║     ██║   ██║██║╚██╗██║██║╚██╗██║██╔══╝  ██║        ██║{Colors.ENDC}     {Colors.BOLD}║{Colors.ENDC}")
+    center_print(f"{Colors.BOLD}║{Colors.ENDC}  {Colors.BLUE}╚██████╗╚██████╔╝██║ ╚████║██║ ╚████║███████╗╚██████╗   ██║{Colors.ENDC}     {Colors.BOLD}║{Colors.ENDC}")
+    center_print(f"{Colors.BOLD}║{Colors.ENDC}  {Colors.BLUE} ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝  ╚═══╝╚══════╝ ╚═════╝   ╚═╝{Colors.ENDC}     {Colors.BOLD}║{Colors.ENDC}")
+    center_print(f"{Colors.BOLD}║{Colors.ENDC}                                                                  {Colors.BOLD}║{Colors.ENDC}")
+    center_print(f"{Colors.BOLD}║{Colors.ENDC}                    Development Runner                            {Colors.BOLD}║{Colors.ENDC}")
+    center_print(f"{Colors.BOLD}╚══════════════════════════════════════════════════════════════════╝{Colors.ENDC}")
 
 def print_menu(target_ip: Optional[str]):
     """Print the main menu with colors and status indicators"""
@@ -69,9 +149,10 @@ def print_menu(target_ip: Optional[str]):
     else:
         ip_status = f"{Colors.DIM}{ip_label}{Colors.ENDC}{Colors.RED}{ip_icon}{ip_display}{Colors.ENDC}"
     
-    print(f"\n{Colors.BOLD}╔═══════════════════════════════════════════════════════════════╗")
-    print(f"║{Colors.ENDC}  {ip_status}{' ' * ip_padding}  {Colors.BOLD}║")
-    print(f"╠═══════════════════════════════════════════════════════════════╣{Colors.ENDC}")
+    print()  # Newline before menu
+    center_print(f"{Colors.BOLD}╔═════════════════════════════════════════════════════════════════╗")
+    center_print(f"║{Colors.ENDC}  {ip_status}{' ' * ip_padding}  {Colors.BOLD}║")
+    center_print(f"╠═════════════════════════════════════════════════════════════════╣{Colors.ENDC}")
     
     menu_items = [
         ("", "COMPILATION", "header"),
@@ -107,32 +188,32 @@ def print_menu(target_ip: Optional[str]):
             padding_total = 61 - len(desc)
             padding_left = padding_total // 2
             padding_right = padding_total - padding_left
-            print(f"{Colors.BOLD}║{Colors.ENDC}  {' ' * padding_left}{Colors.YELLOW}{Colors.BOLD}{desc}{Colors.ENDC}{' ' * padding_right}  {Colors.BOLD}║{Colors.ENDC}")
+            center_print(f"{Colors.BOLD}║{Colors.ENDC}  {' ' * padding_left}{Colors.YELLOW}{Colors.BOLD}{desc}{Colors.ENDC}{' ' * padding_right}  {Colors.BOLD}║{Colors.ENDC}")
         elif item_type == "separator":
-            print(f"{Colors.BOLD}║{Colors.ENDC}  {Colors.DIM}{'─' * 61}{Colors.ENDC}  {Colors.BOLD}║{Colors.ENDC}")
+            center_print(f"{Colors.BOLD}║{Colors.ENDC}  {Colors.DIM}{'─' * 61}{Colors.ENDC}  {Colors.BOLD}║{Colors.ENDC}")
         elif item_type == "action":
             # Format: "NN │ description" (2 + 3 + desc, need to pad to 61)
             content_len = 2 + 3 + len(desc)
             padding = 61 - content_len
-            print(f"{Colors.BOLD}║{Colors.ENDC}  {Colors.CYAN}{num:>2}{Colors.ENDC} │ {Colors.BOLD}{desc}{Colors.ENDC}{' ' * padding}  {Colors.BOLD}║{Colors.ENDC}")
+            center_print(f"{Colors.BOLD}║{Colors.ENDC}  {Colors.CYAN}{num:>2}{Colors.ENDC} │ {Colors.BOLD}{desc}{Colors.ENDC}{' ' * padding}  {Colors.BOLD}║{Colors.ENDC}")
         elif item_type == "special":
             content_len = 2 + 3 + len(desc)
             padding = 61 - content_len
-            print(f"{Colors.BOLD}║{Colors.ENDC}  {Colors.HEADER}{num:>2}{Colors.ENDC} │ {Colors.BOLD}{desc}{Colors.ENDC}{' ' * padding}  {Colors.BOLD}║{Colors.ENDC}")
+            center_print(f"{Colors.BOLD}║{Colors.ENDC}  {Colors.HEADER}{num:>2}{Colors.ENDC} │ {Colors.BOLD}{desc}{Colors.ENDC}{' ' * padding}  {Colors.BOLD}║{Colors.ENDC}")
         elif item_type == "danger":
             content_len = 2 + 3 + len(desc)
             padding = 61 - content_len
-            print(f"{Colors.BOLD}║{Colors.ENDC}  {Colors.RED}{num:>2}{Colors.ENDC} │ {Colors.BOLD}{desc}{Colors.ENDC}{' ' * padding}  {Colors.BOLD}║{Colors.ENDC}")
+            center_print(f"{Colors.BOLD}║{Colors.ENDC}  {Colors.RED}{num:>2}{Colors.ENDC} │ {Colors.BOLD}{desc}{Colors.ENDC}{' ' * padding}  {Colors.BOLD}║{Colors.ENDC}")
         elif item_type == "config":
             content_len = 2 + 3 + len(desc)
             padding = 61 - content_len
-            print(f"{Colors.BOLD}║{Colors.ENDC}  {Colors.GREEN}{num:>2}{Colors.ENDC} │ {Colors.BOLD}{desc}{Colors.ENDC}{' ' * padding}  {Colors.BOLD}║{Colors.ENDC}")
+            center_print(f"{Colors.BOLD}║{Colors.ENDC}  {Colors.GREEN}{num:>2}{Colors.ENDC} │ {Colors.BOLD}{desc}{Colors.ENDC}{' ' * padding}  {Colors.BOLD}║{Colors.ENDC}")
         elif item_type == "exit":
             content_len = 2 + 3 + len(desc)
             padding = 61 - content_len
-            print(f"{Colors.BOLD}║{Colors.ENDC}  {Colors.DIM}{num:>2}{Colors.ENDC} │ {Colors.DIM}{desc}{Colors.ENDC}{' ' * padding}  {Colors.BOLD}║{Colors.ENDC}")
+            center_print(f"{Colors.BOLD}║{Colors.ENDC}  {Colors.DIM}{num:>2}{Colors.ENDC} │ {Colors.DIM}{desc}{Colors.ENDC}{' ' * padding}  {Colors.BOLD}║{Colors.ENDC}")
     
-    print(f"{Colors.BOLD}╚═══════════════════════════════════════════════════════════════╝{Colors.ENDC}")
+    center_print(f"{Colors.BOLD}╚═════════════════════════════════════════════════════════════════╝{Colors.ENDC}")
 
 def status_msg(msg: str, status: str = "info"):
     """Print a status message with icon"""
@@ -499,12 +580,13 @@ def main():
     """Main menu loop"""
     while True:
         os.system('clear')
+        show_splash_image()
         print_banner()
         target_ip = load_ip()
         print_menu(target_ip)
         
         try:
-            choice = input(f"\n{Colors.BOLD}{Colors.CYAN}➜{Colors.ENDC} Choose an option: ").strip()
+            choice = center_input(f"\n{Colors.BOLD}{Colors.CYAN}➜{Colors.ENDC} Choose an option: ").strip()
         except (KeyboardInterrupt, EOFError):
             print(f"\n\n{Colors.YELLOW}Goodbye!{Colors.ENDC}")
             sys.exit(0)
