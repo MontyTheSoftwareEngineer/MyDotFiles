@@ -244,7 +244,10 @@ def run_ssh_cmd(ip: str, cmd: str, interactive: bool = False) -> int:
     """Run SSH command on target"""
     ssh_cmd = f"sshpass -p '{Config.PASSWORD}' ssh {Config.SSH_OPTS} root@{ip}"
     if interactive:
-        return subprocess.call(f"{ssh_cmd}")
+        if cmd:
+            return subprocess.call(f"{ssh_cmd} \"{cmd}\"", shell=True)
+        else:
+            return subprocess.call(f"{ssh_cmd}", shell=True)
     else:
         return subprocess.call(f"{ssh_cmd} \"{cmd}\"", shell=True)
 
