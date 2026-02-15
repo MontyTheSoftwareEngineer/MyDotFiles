@@ -6,7 +6,7 @@ return {
       has_breadcrumbs = true, -- Show filename and line numbers
       has_line_number = true,
       bg_theme = "default", -- Available options: "moody", "sharp", "blurry"
-      watermark = "",
+      watermark = "Version 1.0",
     })
   end,
   keys = {

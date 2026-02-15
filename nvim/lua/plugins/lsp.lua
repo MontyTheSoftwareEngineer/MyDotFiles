@@ -56,6 +56,13 @@ return {
         },
       }
 
+      -- Setup qmlls LSP for QML
+      vim.lsp.config.qmlls = {
+        cmd = { 'qmlls' },
+        filetypes = { 'qml', 'qmljs' },
+        on_attach = on_attach,
+      }
+
       -- Diagnostics configuration (optional, disable virtual text)
       vim.diagnostic.config({ virtual_text = true })
     end,

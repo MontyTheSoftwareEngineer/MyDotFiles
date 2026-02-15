@@ -1,0 +1,136 @@
+return {
+  "sindrets/diffview.nvim",
+  dependencies = { "nvim-lua/plenary.nvim" },
+  cmd = { "DiffviewOpen", "DiffviewClose", "DiffviewToggleFiles", "DiffviewFocusFiles", "DiffviewFileHistory" },
+  config = function()
+    local actions = require("diffview.actions")
+    
+    require("diffview").setup({
+      diff_binaries = false,
+      enhanced_diff_hl = true,
+      use_icons = true,
+      show_help_hints = true,
+      
+      view = {
+        default = {
+          layout = "diff2_horizontal",
+          winbar_info = false,
+        },
+        merge_tool = {
+          layout = "diff3_horizontal",
+          disable_diagnostics = true,
+          winbar_info = true,
+        },
+        file_history = {
+          layout = "diff2_horizontal",
+          winbar_info = false,
+        },
+      },
+      
+      file_panel = {
+        listing_style = "tree",
+        tree_options = {
+          flatten_dirs = true,
+          folder_statuses = "only_folded",
+        },
+        win_config = {
+          position = "left",
+          width = 35,
+          win_opts = {}
+        },
+      },
+      
+      key_bindings = {
+        disable_defaults = false,
+        view = {
+          -- Toggle file panel
+          { "n", "<leader>e",  actions.toggle_files,              { desc = "Toggle file panel" } },
+          { "n", "<leader>b",  actions.focus_files,               { desc = "Focus file panel" } },
+          
+          -- Navigation
+          { "n", "[x",         actions.prev_conflict,             { desc = "Previous conflict" } },
+          { "n", "]x",         actions.next_conflict,             { desc = "Next conflict" } },
+          { "n", "[c",         actions.prev_entry,                { desc = "Previous file" } },
+          { "n", "]c",         actions.next_entry,                { desc = "Next file" } },
+          
+          -- Conflict resolution
+          { "n", "<leader>co", actions.conflict_choose("ours"),   { desc = "Choose ours" } },
+          { "n", "<leader>ct", actions.conflict_choose("theirs"), { desc = "Choose theirs" } },
+          { "n", "<leader>cb", actions.conflict_choose("base"),   { desc = "Choose base" } },
+          { "n", "<leader>ca", actions.conflict_choose("all"),    { desc = "Choose all" } },
+          { "n", "dx",         actions.conflict_choose("none"),   { desc = "Delete conflict region" } },
+          
+          -- Focus windows
+          { "n", "gf",         actions.goto_file_edit,            { desc = "Open file in new tab" } },
+          { "n", "<C-w><C-f>", actions.goto_file_split,           { desc = "Open file in split" } },
+          { "n", "<C-w>gf",    actions.goto_file_tab,             { desc = "Open file in tab" } },
+          
+          -- Toggles
+          { "n", "g<C-x>",     actions.cycle_layout,              { desc = "Cycle diff layout" } },
+          { "n", "g?",         actions.help("view"),              { desc = "Show help" } },
+        },
+        
+        file_panel = {
+          { "n", "j",             actions.next_entry,              { desc = "Next entry" } },
+          { "n", "k",             actions.prev_entry,              { desc = "Previous entry" } },
+          { "n", "<cr>",          actions.select_entry,            { desc = "Select entry" } },
+          { "n", "-",             actions.toggle_stage_entry,      { desc = "Stage/unstage" } },
+          { "n", "S",             actions.stage_all,               { desc = "Stage all" } },
+          { "n", "U",             actions.unstage_all,             { desc = "Unstage all" } },
+          { "n", "R",             actions.refresh_files,           { desc = "Refresh" } },
+          { "n", "L",             actions.open_commit_log,         { desc = "Open commit log" } },
+          { "n", "<c-b>",         actions.scroll_view(-0.25),      { desc = "Scroll up" } },
+          { "n", "<c-f>",         actions.scroll_view(0.25),       { desc = "Scroll down" } },
+          { "n", "<tab>",         actions.select_next_entry,       { desc = "Next entry" } },
+          { "n", "<s-tab>",       actions.select_prev_entry,       { desc = "Previous entry" } },
+          { "n", "gf",            actions.goto_file_edit,          { desc = "Open file" } },
+          { "n", "<C-w><C-f>",    actions.goto_file_split,         { desc = "Open in split" } },
+          { "n", "<C-w>gf",       actions.goto_file_tab,           { desc = "Open in tab" } },
+          { "n", "i",             actions.listing_style,           { desc = "Toggle listing style" } },
+          { "n", "f",             actions.toggle_flatten_dirs,     { desc = "Toggle flatten" } },
+          { "n", "g<C-x>",        actions.cycle_layout,            { desc = "Cycle layout" } },
+          { "n", "[x",            actions.prev_conflict,           { desc = "Previous conflict" } },
+          { "n", "]x",            actions.next_conflict,           { desc = "Next conflict" } },
+          { "n", "g?",            actions.help("file_panel"),      { desc = "Help" } },
+        },
+        
+        file_history_panel = {
+          { "n", "g!",            actions.options,                 { desc = "Options" } },
+          { "n", "<C-A-d>",       actions.open_in_diffview,        { desc = "Open in diffview" } },
+          { "n", "y",             actions.copy_hash,               { desc = "Copy hash" } },
+          { "n", "L",             actions.open_commit_log,         { desc = "Show log" } },
+          { "n", "zR",            actions.open_all_folds,          { desc = "Expand all" } },
+          { "n", "zM",            actions.close_all_folds,         { desc = "Collapse all" } },
+          { "n", "j",             actions.next_entry,              { desc = "Next" } },
+          { "n", "k",             actions.prev_entry,              { desc = "Previous" } },
+          { "n", "<cr>",          actions.select_entry,            { desc = "Select" } },
+          { "n", "<c-b>",         actions.scroll_view(-0.25),      { desc = "Scroll up" } },
+          { "n", "<c-f>",         actions.scroll_view(0.25),       { desc = "Scroll down" } },
+          { "n", "<tab>",         actions.select_next_entry,       { desc = "Next entry" } },
+          { "n", "<s-tab>",       actions.select_prev_entry,       { desc = "Previous entry" } },
+          { "n", "gf",            actions.goto_file_edit,          { desc = "Open file" } },
+          { "n", "<C-w><C-f>",    actions.goto_file_split,         { desc = "Open in split" } },
+          { "n", "<C-w>gf",       actions.goto_file_tab,           { desc = "Open in tab" } },
+          { "n", "g<C-x>",        actions.cycle_layout,            { desc = "Cycle layout" } },
+          { "n", "g?",            actions.help("file_history_panel"), { desc = "Help" } },
+        },
+      },
+    })
+  end,
+  keys = {
+    -- Open diffview to see all changes
+    { "<leader>dv", "<cmd>DiffviewOpen<cr>", desc = "Open Diffview" },
+    { "<leader>dV", "<cmd>DiffviewOpen HEAD~1<cr>", desc = "Diff vs HEAD~1" },
+    { "<leader>dc", "<cmd>DiffviewClose<cr>", desc = "Close Diffview" },
+    
+    -- File history
+    { "<leader>dh", "<cmd>DiffviewFileHistory<cr>", desc = "File History (all)" },
+    { "<leader>dH", "<cmd>DiffviewFileHistory %<cr>", desc = "File History (current)" },
+    
+    -- Compare branches
+    { "<leader>dm", "<cmd>DiffviewOpen origin/main...HEAD<cr>", desc = "Diff vs origin/main" },
+    
+    -- Merge conflict resolution
+    { "<leader>dr", "<cmd>DiffviewOpen<cr>", desc = "Resolve Conflicts" },
+  },
+}

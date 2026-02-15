@@ -38,36 +38,6 @@ return {
       end,
     })
   end,
-  keys = {
-    -- Status (the one you live in)
-    { "<leader>gs", "<cmd>Git<cr>", desc = "Git status (Fugitive)" },
 
-    -- Diff workflows
-    { "<leader>gd", "<cmd>Gvdiffsplit<cr>", desc = "Git diff (3-way vs index/HEAD)" },
-    { "<leader>gD", "<cmd>Gdiffsplit<cr>", desc = "Git diff (horizontal split)" },
-
-    -- Blame
-    { "<leader>gb", "<cmd>Git blame<cr>", desc = "Git blame (Fugitive)" },
-
-    -- Log
-    { "<leader>gl", "<cmd>Git log --oneline --decorate --graph --all<cr>", desc = "Git log graph" },
-    { "<leader>gL", "<cmd>Gclog<cr>", desc = "Git log for current file (Gclog)" },
-
-    -- Quick push/pull (useful when you just want it done)
-    { "<leader>gp", "<cmd>Git push<cr>", desc = "Git push" },
-    { "<leader>gP", "<cmd>Git pull --rebase<cr>", desc = "Git pull --rebase" },
-
-    -- Commit
-    { "<leader>gc", "<cmd>Git commit<cr>", desc = "Git commit" },
-    { "<leader>gC", "<cmd>Git commit --amend<cr>", desc = "Git commit --amend" },
-
-    -- Browse remote (requires vim-rhubarb; works best on GitHub)
-    { "<leader>go", "<cmd>GBrowse<cr>", desc = "Open on remote (GBrowse)" },
-    { "<leader>gO", "<cmd>GBrowse!<cr>", desc = "Copy remote URL (GBrowse!)" },
-
-    -- Inside fugitive status: stage/unstage, etc are built-in:
-    --   - on a file: "-" toggles stage
-    --   - "cc" commit, "ca" amend, "P" push, "pp" pull, "=" diff, "dd" diff split, etc.
-  },
 }
 
